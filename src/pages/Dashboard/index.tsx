@@ -27,7 +27,9 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
-      // TODO LOAD FOODS
+      api.get('/foods').then(response => {
+        setFoods(response.data);
+      });
     }
 
     loadFoods();
@@ -37,7 +39,17 @@ const Dashboard: React.FC = () => {
     food: Omit<IFoodPlate, 'id' | 'available'>,
   ): Promise<void> {
     try {
-      // TODO ADD A NEW FOOD PLATE TO THE API
+      const newItem = {
+        ...food,
+        available: true,
+        id: foods.length + 1,
+      };
+
+      const updatedArray = [...foods, newItem];
+
+      setFoods(updatedArray);
+
+      api.post('/foods', newItem);
     } catch (err) {
       console.log(err);
     }
@@ -47,10 +59,32 @@ const Dashboard: React.FC = () => {
     food: Omit<IFoodPlate, 'id' | 'available'>,
   ): Promise<void> {
     // TODO UPDATE A FOOD PLATE ON THE API
+    const updatedItem = {
+      ...food,
+      id: editingFood.id,
+      available: editingFood.available,
+    };
+
+    // replace updated item in the food list
+    const itemIndex = foods.findIndex(item => item.id === editingFood.id);
+    const updatedArray = foods;
+    updatedArray.splice(itemIndex, 1, updatedItem);
+
+    setFoods(updatedArray);
+
+    await api.put(`/foods/${editingFood.id}`, updatedItem);
   }
 
   async function handleDeleteFood(id: number): Promise<void> {
     // TODO DELETE A FOOD PLATE FROM THE API
+    api.delete(`/foods/${id}`);
+
+    const itemIndex = foods.findIndex(item => item.id === id);
+
+    const updatedArray = foods;
+    updatedArray.splice(itemIndex, 1);
+
+    setFoods(updatedArray);
   }
 
   function toggleModal(): void {
@@ -62,17 +96,21 @@ const Dashboard: React.FC = () => {
   }
 
   function handleEditFood(food: IFoodPlate): void {
-    // TODO SET THE CURRENT EDITING FOOD ID IN THE STATE
+    setEditingFood(food);
+
+    setEditModalOpen(true);
   }
 
   return (
     <>
       <Header openModal={toggleModal} />
+
       <ModalAddFood
         isOpen={modalOpen}
         setIsOpen={toggleModal}
         handleAddFood={handleAddFood}
       />
+
       <ModalEditFood
         isOpen={editModalOpen}
         setIsOpen={toggleEditModal}
