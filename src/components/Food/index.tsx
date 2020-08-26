@@ -4,6 +4,8 @@ import { FiEdit3, FiTrash } from 'react-icons/fi';
 
 import { Container } from './styles';
 
+import api from '../../services/api';
+
 interface IFoodPlate {
   id: number;
   name: string;
@@ -27,11 +29,17 @@ const Food: React.FC<IProps> = ({
   const [isAvailable, setIsAvailable] = useState(food.available);
 
   function setEditingFood(): void {
-    handleEditFood({ ...food, available: isAvailable });
+    handleEditFood(food);
   }
 
   async function toggleAvailable(): Promise<void> {
-    setIsAvailable(!isAvailable);
+    try {
+      await api.put(`/foods/${food.id}`, { ...food, available: !isAvailable });
+
+      setIsAvailable(!isAvailable);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (

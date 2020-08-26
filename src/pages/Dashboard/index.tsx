@@ -59,32 +59,34 @@ const Dashboard: React.FC = () => {
     food: Omit<IFoodPlate, 'id' | 'available'>,
   ): Promise<void> {
     // TODO UPDATE A FOOD PLATE ON THE API
-    const updatedItem = {
-      ...food,
-      id: editingFood.id,
-      available: editingFood.available,
-    };
 
-    // replace updated item in the food list
-    const itemIndex = foods.findIndex(item => item.id === editingFood.id);
-    const updatedArray = foods;
-    updatedArray.splice(itemIndex, 1, updatedItem);
+    try {
+      const updatedItem = {
+        ...editingFood,
+        ...food,
+      };
 
-    setFoods(updatedArray);
+      // replace updated item in the food list
+      const itemIndex = foods.findIndex(item => item.id === editingFood.id);
+      const updatedArray = foods;
+      updatedArray.splice(itemIndex, 1, updatedItem);
 
-    await api.put(`/foods/${editingFood.id}`, updatedItem);
+      setFoods(updatedArray);
+
+      await api.put(`/foods/${editingFood.id}`, updatedItem);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async function handleDeleteFood(id: number): Promise<void> {
-    // TODO DELETE A FOOD PLATE FROM THE API
-    api.delete(`/foods/${id}`);
+    try {
+      await api.delete(`/foods/${id}`);
 
-    const itemIndex = foods.findIndex(item => item.id === id);
-
-    const updatedArray = foods;
-    updatedArray.splice(itemIndex, 1);
-
-    setFoods(updatedArray);
+      setFoods(foods.filter(item => item.id !== id));
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   function toggleModal(): void {
